@@ -1,3 +1,4 @@
+var filteredData;
 document.addEventListener("DOMContentLoaded", () => {
   fetch("data/students.xlsx")
     .then(res => res.arrayBuffer())
@@ -18,31 +19,6 @@ document.addEventListener("DOMContentLoaded", () => {
   filters.forEach(id => document.getElementById(id).addEventListener("change", applyFilters));
 });
 
-// function populateFilters(data) {
-//   const setDropdown = (id, accessor) => {
-//     const select = document.getElementById(id);
-//     const values = [...new Set(data.map(accessor))].sort();
-//     values.forEach(v => {
-//       const opt = document.createElement("option");
-//       opt.value = v;
-//       opt.textContent = v;
-//       select.appendChild(opt);
-//     });
-//   };
-//   setDropdown("gradFilter", row => row["Graduation"]);
-//   setDropdown("gradStreamFilter", row => row["Graduation Stream"]);
-//   setDropdown("gradYearFilter", row => row["Graduation Year"]);
-//   setDropdown("interestFilter", () => {
-//     const interestsSet = new Set();
-//     data.forEach(row => {
-//       const raw = row["Areas Interested"];
-//       if (raw) {
-//         raw.split(",").forEach(item => interestsSet.add(item.trim().toLowerCase()));
-//       }
-//     });
-//     return Array.from(interestsSet).sort((a, b) => a.localeCompare(b));
-//   });
-//   }
 
 function populateFilters(data) {
   const setDropdown = (id, values, label) => {
@@ -131,6 +107,7 @@ function applyFilters() {
   });
 
   renderGrid(filtered);
+  filteredData = filtered;
 }
 
 function renderGrid(data) {
@@ -158,9 +135,6 @@ function renderGrid(data) {
     div.onclick = () => openModal(student);
     grid.appendChild(div);
   });
-
-
-
 
 }
 
@@ -192,4 +166,19 @@ function openModal(student) {
 
 function closeModal() {
   document.getElementById("studentModal").style.display = "none";
+}
+
+function downloadFilteredData() {
+  if (!filteredData || filteredData.length === 0) {
+    alert("No data to download!");
+    return;
+  }
+
+  // Convert JSON to worksheet
+  const worksheet = XLSX.utils.json_to_sheet(filteredData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Students");
+
+  // Generate and trigger download
+  XLSX.writeFile(workbook, "Filtered_Students_List.xlsx");
 }
