@@ -137,3 +137,21 @@ a {
   height: 24px;
 }
 
+.download-container {
+  text-align: center;
+  margin: 20px 0;
+}
+
+.download-button {
+  padding: 10px 20px;
+  background-color: #005aa7;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.download-button:hover {
+  background-color: #003f7f;
+}
