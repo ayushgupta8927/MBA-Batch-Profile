@@ -127,7 +127,7 @@ function renderGrid(data) {
         <img src="icons/linkedin.png" alt="LinkedIn" style="width: 20px; height: 20px;" />
       </a>
       <a href="resumes/${student.Name.trim()}.pdf" target="_blank">
-        <img src="icons/download.png" alt="View Resume" style="width: 20px; height: 20px;" />
+        <img src="icons/preview.png" alt="View Resume" style="width: 20px; height: 20px;" />
       </a>
     </div>
   `;
@@ -135,6 +135,9 @@ function renderGrid(data) {
     div.onclick = () => openModal(student);
     grid.appendChild(div);
   });
+
+
+
 
 }
 
@@ -145,11 +148,13 @@ function openModal(student) {
   document.getElementById("modalDetails").innerHTML = `
     <div style="text-align: left; position: relative; padding-bottom: 40px;">
       <p><strong>Email:</strong> ${student["IITK Email"]}</p>
-      <p><strong>UG College:</strong> ${student["UG College"]}</p>
-      <p><strong>Previous Company:</strong> ${student["Previous Employment History"] || "N/A"}</p>
       <p><strong>Work Ex:</strong> ${student["Work -Ex (in Months)"]} months</p>
+      <p><strong>Previous Company:</strong> ${student["Previous Employment History"] || "N/A"}</p>
+      <p><strong>UG College:</strong> ${student["UG College"]}</p>
+      <p><strong>UG Degree:</strong> ${student["Graduation"]},${student["Graduation Stream"]}</p>
+
       <p><strong>Area Interested:</strong> ${student["Areas Interested"]}</p>
-      <p><strong>CGPA:</strong> ${student["Current Aggregate CGPA"]}</p>
+      <p><strong>Current CGPA:</strong> ${student["Current Aggregate CGPA"]}</p>
 
       <a href="resumes/${student.Name.trim()}.pdf" target="_blank" 
          style="position: absolute; bottom: 10px; right: 10px; display: flex; align-items: center; gap: 6px; text-decoration: none; color: #0077b5;">
