@@ -1,48 +1,60 @@
+var filteredData;
 document.addEventListener("DOMContentLoaded", () => {
-  fetch("data/students.xlsx")
-    .then(res => res.arrayBuffer())
-    .then(ab => {
-      const wb = XLSX.read(ab, { type: "array" });
-      const ws = wb.Sheets[wb.SheetNames[0]];
-      const data = XLSX.utils.sheet_to_json(ws);
+  // Replace this with your published Google Sheets CSV link
+  const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTSz-qn6FZy2h5LONgavxoAg53ZSZVNAup9mLTbOiODMuYemVEpXVKP1k5oK5olweQemxvg1FoCCKui/pub?output=csv";
+
+  Papa.parse(sheetURL, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function (results) {
+      const data = results.data.map(row => {
+        // Optional: trim Name and normalize fields here if needed
+        return {
+          ...row,
+          Name: row.Name?.trim(),
+          "Areas Interested": row["Areas Interested"]?.toLowerCase()
+        };
+      });
+
       window.originalData = data;
       populateFilters(data);
       renderGrid(data);
-    });
+    },
+    error: function (err) {
+      console.error("Error fetching Google Sheet:", err);
+    }
+  });
 
   const filters = [
     "cgpaFilter", "gradYearFilter", "interestFilter", "gradFilter",
     "marks10Filter", "marks12Filter", "ugFilter", "workExFilter", "gradStreamFilter"
-
   ];
-  filters.forEach(id => document.getElementById(id).addEventListener("change", applyFilters));
+  filters.forEach(id => document.getElementById(id)?.addEventListener("change", applyFilters));
 });
 
-// function populateFilters(data) {
-//   const setDropdown = (id, accessor) => {
-//     const select = document.getElementById(id);
-//     const values = [...new Set(data.map(accessor))].sort();
-//     values.forEach(v => {
-//       const opt = document.createElement("option");
-//       opt.value = v;
-//       opt.textContent = v;
-//       select.appendChild(opt);
+
+// document.addEventListener("DOMContentLoaded", () => {
+//   fetch("data/students.xlsx")
+  
+//     .then(res => res.arrayBuffer())
+//     .then(ab => {
+//       const wb = XLSX.read(ab, { type: "array" });
+//       const ws = wb.Sheets[wb.SheetNames[0]];
+//       const data = XLSX.utils.sheet_to_json(ws);
+//       window.originalData = data;
+//       populateFilters(data);
+//       renderGrid(data);
 //     });
-//   };
-//   setDropdown("gradFilter", row => row["Graduation"]);
-//   setDropdown("gradStreamFilter", row => row["Graduation Stream"]);
-//   setDropdown("gradYearFilter", row => row["Graduation Year"]);
-//   setDropdown("interestFilter", () => {
-//     const interestsSet = new Set();
-//     data.forEach(row => {
-//       const raw = row["Areas Interested"];
-//       if (raw) {
-//         raw.split(",").forEach(item => interestsSet.add(item.trim().toLowerCase()));
-//       }
-//     });
-//     return Array.from(interestsSet).sort((a, b) => a.localeCompare(b));
-//   });
-//   }
+
+//   const filters = [
+//     "cgpaFilter", "gradYearFilter", "interestFilter", "gradFilter",
+//     "marks10Filter", "marks12Filter", "ugFilter", "workExFilter", "gradStreamFilter"
+
+//   ];
+//   filters.forEach(id => document.getElementById(id).addEventListener("change", applyFilters));
+// });
+
 
 function populateFilters(data) {
   const setDropdown = (id, values, label) => {
@@ -122,15 +134,16 @@ function applyFilters() {
     let workCheck = true;
     const wex = parseInt(row["Work -Ex (in Months)"] || 0);
     if (workEx === "0") workCheck = wex === 0;
-    else if (workEx === "1-12") workCheck = wex >= 1 && wex <= 12;
-    else if (workEx === "13-24") workCheck = wex >= 13 && wex <= 24;
-    else if (workEx === "25-36") workCheck = wex >= 25 && wex <= 36;
-    else if (workEx === "37") workCheck = wex > 36;
+    else if (workEx === "< 12") workCheck = wex >= 1 && wex <= 12;
+    else if (workEx === "> 12") workCheck = wex >= 13 ;
+    else if (workEx === "> 24") workCheck = wex >= 25 ;
+    else if (workEx === "> 36") workCheck = wex > 36;
 
     return cgpaCheck && m10Check && m12Check && ugCheck && gradCheck && intCheck && workCheck && streamCheck && graduationCheck;
   });
 
   renderGrid(filtered);
+  filteredData = filtered;
 }
 
 function renderGrid(data) {
@@ -145,12 +158,13 @@ function renderGrid(data) {
     <img src="images/${student.Name.trim()}.jpg" alt="${student.Name}" onerror="this.onerror=null; this.src='images/fallback.png';" />
     <h4>${student.Name}</h4>
     <p>${student["IITK Email"]}</p>
+    <p><Strong>Work-Ex:</strong>${student["Work -Ex (in Months)"]}&nbsp; Months</p>
     <div style="display: flex; justify-content: center; gap: 10px; align-items: center;">
       <a href="${student["LinkedIn URL"]}" target="_blank">
         <img src="icons/linkedin.png" alt="LinkedIn" style="width: 20px; height: 20px;" />
       </a>
       <a href="resumes/${student.Name.trim()}.pdf" target="_blank">
-        <img src="icons/download.png" alt="View Resume" style="width: 20px; height: 20px;" />
+        <img src="icons/preview.png" alt="View Resume" style="width: 20px; height: 20px;" />
       </a>
     </div>
   `;
@@ -171,11 +185,13 @@ function openModal(student) {
   document.getElementById("modalDetails").innerHTML = `
     <div style="text-align: left; position: relative; padding-bottom: 40px;">
       <p><strong>Email:</strong> ${student["IITK Email"]}</p>
-      <p><strong>UG College:</strong> ${student["UG College"]}</p>
-      <p><strong>Previous Company:</strong> ${student["Previous Employment History"] || "N/A"}</p>
       <p><strong>Work Ex:</strong> ${student["Work -Ex (in Months)"]} months</p>
+      <p><strong>Previous Company:</strong> ${student["Previous Employment History"] || "N/A"}</p>
+      <p><strong>UG College:</strong> ${student["UG College"]}</p>
+      <p><strong>UG Degree:</strong> ${student["Graduation"]},${student["Graduation Stream"]}</p>
+
       <p><strong>Area Interested:</strong> ${student["Areas Interested"]}</p>
-      <p><strong>CGPA:</strong> ${student["Current Aggregate CGPA"]}</p>
+      <p><strong>Current CGPA:</strong> ${student["Current Aggregate CGPA"]}</p>
 
       <a href="resumes/${student.Name.trim()}.pdf" target="_blank" 
          style="position: absolute; bottom: 10px; right: 10px; display: flex; align-items: center; gap: 6px; text-decoration: none; color: #0077b5;">
@@ -192,4 +208,19 @@ function openModal(student) {
 
 function closeModal() {
   document.getElementById("studentModal").style.display = "none";
+}
+
+function downloadFilteredData() {
+  if (!filteredData || filteredData.length === 0) {
+    alert("No data to download!");
+    return;
+  }
+
+  // Convert JSON to worksheet
+  const worksheet = XLSX.utils.json_to_sheet(filteredData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Students");
+
+  // Generate and trigger download
+  XLSX.writeFile(workbook, "Filtered_Students_List.xlsx");
 }
