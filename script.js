@@ -155,7 +155,7 @@ function renderGrid(data) {
     div.className = "grid-item";
 
     div.innerHTML = `
-    <img src="images/${student.Name.trim()}.jpg" alt="${student.Name}" onerror="this.onerror=null; this.src='images/fallback.png';" />
+    <img src="images/${student.Name.trim()}.jpg" alt="${student.Name}" onerror="this.onerror=null; this.src='images/default.jpg';" />
     <h4>${student.Name}</h4>
     <p>${student["IITK Email"]}</p>
     <p><Strong>Work-Ex:</strong>${student["Work -Ex (in Months)"]}&nbsp; Months</p>
