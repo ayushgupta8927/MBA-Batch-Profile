@@ -56,28 +56,67 @@ document.addEventListener("DOMContentLoaded", () => {
 // });
 
 
+// function populateFilters(data) {
+//   const setDropdown = (id, values, label) => {
+//     const select = document.getElementById(id);
+//     select.innerHTML = "";
+
+//     const defaultOption = document.createElement("option");
+//     defaultOption.value = "";
+//     defaultOption.textContent = label;
+//     defaultOption.disabled = true;
+//     defaultOption.selected = true;
+//     select.appendChild(defaultOption);
+
+//     const allOption = document.createElement("option");
+//     allOption.value = "";
+//     allOption.textContent = "All";
+//     select.appendChild(allOption);
+
+//     values.forEach(v => {
+//       const opt = document.createElement("option");
+//       opt.value = v;
+//       opt.textContent = v;
+//       select.appendChild(opt);
+//     });
+//   };
+
+//   // Graduation dropdown
+//   const gradValues = [...new Set(data.map(row => row["Graduation"]))].sort();
+//   setDropdown("gradFilter", gradValues, "Graduation");
+
+//   // Graduation Stream dropdown
+//   setDropdown("gradStreamFilter", row => row["Graduation Stream Category"]);
+
+
+//   // Graduation Year dropdown
+//   const gradYearValues = [...new Set(data.map(row => row["Graduation Year"]))].sort();
+//   setDropdown("gradYearFilter", gradYearValues, "Graduation Year");
+
+//   // Areas Interested dropdown (fixed list)
+//   const allAreas = [
+//     "Marketing", "Consulting", "Analytics", "Sales", "Operations", "Finance", "HR"
+//   ];
+//   setDropdown("interestFilter", allAreas, "Areas Interested");
+// }
 function populateFilters(data) {
-  const setDropdown = (id, values, label) => {
+  // Helper to set dropdown by unique values
+  const setDropdown = (id, values, defaultOption) => {
     const select = document.getElementById(id);
-    select.innerHTML = "";
-
-    const defaultOption = document.createElement("option");
-    defaultOption.value = "";
-    defaultOption.textContent = label;
-    defaultOption.disabled = true;
-    defaultOption.selected = true;
-    select.appendChild(defaultOption);
-
-    const allOption = document.createElement("option");
-    allOption.value = "";
-    allOption.textContent = "All";
-    select.appendChild(allOption);
-
+    select.innerHTML = ""; // clear existing
+    // Add default option
+    const defaultOpt = document.createElement("option");
+    defaultOpt.value = "";
+    defaultOpt.textContent = defaultOption || "No Filter";
+    select.appendChild(defaultOpt);
+    // Add unique values
     values.forEach(v => {
-      const opt = document.createElement("option");
-      opt.value = v;
-      opt.textContent = v;
-      select.appendChild(opt);
+      if (v) {  // skip empty/null
+        const opt = document.createElement("option");
+        opt.value = v;
+        opt.textContent = v;
+        select.appendChild(opt);
+      }
     });
   };
 
@@ -85,22 +124,66 @@ function populateFilters(data) {
   const gradValues = [...new Set(data.map(row => row["Graduation"]))].sort();
   setDropdown("gradFilter", gradValues, "Graduation");
 
-  // Graduation Stream dropdown
-  const streamValues = [...new Set(data.map(row => row["Graduation Stream"]))].sort();
-  setDropdown("gradStreamFilter", streamValues, "Graduation Stream");
+  // Graduation Stream Category dropdown
+  const streamCatValues = [...new Set(data.map(row => row["Graduation Stream Category"]))].sort();
+  setDropdown("gradStreamFilter", streamCatValues, "Graduation Stream Category");
 
   // Graduation Year dropdown
   const gradYearValues = [...new Set(data.map(row => row["Graduation Year"]))].sort();
   setDropdown("gradYearFilter", gradYearValues, "Graduation Year");
 
   // Areas Interested dropdown (fixed list)
-  const allAreas = [
-    "Marketing", "Consulting", "Analytics", "Sales", "Operations", "Finance", "HR"
-  ];
+  const allAreas = ["Marketing", "Consulting", "Analytics", "Sales", "Operations", "Finance", "HR"];
   setDropdown("interestFilter", allAreas, "Areas Interested");
 }
 
 
+
+// function applyFilters() {
+//   const cgpaVal = parseFloat(document.getElementById("cgpaFilter").value) || 0;
+//   const gradYear = document.getElementById("gradYearFilter").value;
+//   const areaInt = document.getElementById("interestFilter").value;
+//   const m10 = parseFloat(document.getElementById("marks10Filter").value) || 0;
+//   const m12 = parseFloat(document.getElementById("marks12Filter").value) || 0;
+//   const ug = parseFloat(document.getElementById("ugFilter").value) || 0;
+//   const workEx = document.getElementById("workExFilter").value;
+//   const streamCheck = stream ? row["Graduation Stream Category"] === stream : true;
+
+
+//   const grad = document.getElementById("gradFilter").value;
+
+
+//   let filtered = window.originalData.filter(row => {
+//     const cgpaCheck = parseFloat(row["Current Aggregate CGPA"] || 0) >= cgpaVal;
+//     const m10Check = parseFloat(row["10th Marks"] || 0) >= m10;
+//     const m12Check = parseFloat(row["12th Marks"] || 0) >= m12;
+//     const ugCheck = parseFloat(row["Graduation Percentage"] || 0) >= ug;
+//     const gradCheck = gradYear ? row["Graduation Year"] === gradYear : true;
+//     let intCheck = true;
+//     if (areaInt) {
+//       const interests = (row["Areas Interested"] || "")
+//         .toLowerCase()
+//         .split(",")
+//         .map(s => s.trim());
+//       intCheck = interests.includes(areaInt.toLowerCase());
+//     }
+//     const streamCheck = stream ? row["Graduation Stream"] === stream : true;
+//     const graduationCheck = grad ? row["Graduation"] === grad : true;
+
+//     let workCheck = true;
+//     const wex = parseInt(row["Work -Ex (in Months)"] || 0);
+//     if (workEx === "0") workCheck = wex === 0;
+//     else if (workEx === "< 12") workCheck = wex >= 1 && wex <= 12;
+//     else if (workEx === "> 12") workCheck = wex >= 13 ;
+//     else if (workEx === "> 24") workCheck = wex >= 25 ;
+//     else if (workEx === "> 36") workCheck = wex > 36;
+
+//     return cgpaCheck && m10Check && m12Check && ugCheck && gradCheck && intCheck && workCheck && streamCheck && graduationCheck;
+//   });
+
+//   renderGrid(filtered);
+//   filteredData = filtered;
+// }
 
 function applyFilters() {
   const cgpaVal = parseFloat(document.getElementById("cgpaFilter").value) || 0;
@@ -110,9 +193,8 @@ function applyFilters() {
   const m12 = parseFloat(document.getElementById("marks12Filter").value) || 0;
   const ug = parseFloat(document.getElementById("ugFilter").value) || 0;
   const workEx = document.getElementById("workExFilter").value;
-  const stream = document.getElementById("gradStreamFilter").value;
   const grad = document.getElementById("gradFilter").value;
-
+  const stream = document.getElementById("gradStreamFilter").value;  // <-- get stream filter value
 
   let filtered = window.originalData.filter(row => {
     const cgpaCheck = parseFloat(row["Current Aggregate CGPA"] || 0) >= cgpaVal;
@@ -120,6 +202,8 @@ function applyFilters() {
     const m12Check = parseFloat(row["12th Marks"] || 0) >= m12;
     const ugCheck = parseFloat(row["Graduation Percentage"] || 0) >= ug;
     const gradCheck = gradYear ? row["Graduation Year"] === gradYear : true;
+    const streamCheck = stream ? row["Graduation Stream Category"] === stream : true;  // <-- corrected
+
     let intCheck = true;
     if (areaInt) {
       const interests = (row["Areas Interested"] || "")
@@ -128,15 +212,15 @@ function applyFilters() {
         .map(s => s.trim());
       intCheck = interests.includes(areaInt.toLowerCase());
     }
-    const streamCheck = stream ? row["Graduation Stream"] === stream : true;
+
     const graduationCheck = grad ? row["Graduation"] === grad : true;
 
     let workCheck = true;
     const wex = parseInt(row["Work -Ex (in Months)"] || 0);
     if (workEx === "0") workCheck = wex === 0;
     else if (workEx === "< 12") workCheck = wex >= 1 && wex <= 12;
-    else if (workEx === "> 12") workCheck = wex >= 13 ;
-    else if (workEx === "> 24") workCheck = wex >= 25 ;
+    else if (workEx === "> 12") workCheck = wex >= 13;
+    else if (workEx === "> 24") workCheck = wex >= 25;
     else if (workEx === "> 36") workCheck = wex > 36;
 
     return cgpaCheck && m10Check && m12Check && ugCheck && gradCheck && intCheck && workCheck && streamCheck && graduationCheck;
@@ -145,6 +229,7 @@ function applyFilters() {
   renderGrid(filtered);
   filteredData = filtered;
 }
+
 
 function renderGrid(data) {
   //console.log("Student keys:", Object.keys(student)); 
