@@ -1,4 +1,5 @@
 var filteredData;
+
 document.addEventListener("DOMContentLoaded", () => {
   // Replace this with your published Google Sheets CSV link
   const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTSz-qn6FZy2h5LONgavxoAg53ZSZVNAup9mLTbOiODMuYemVEpXVKP1k5oK5olweQemxvg1FoCCKui/pub?output=csv";
@@ -19,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       window.originalData = data;
       populateFilters(data);
-      renderGrid(data);
+      applyFilters();
     },
     error: function (err) {
       console.error("Error fetching Google Sheet:", err);
@@ -138,6 +139,11 @@ function populateFilters(data) {
 }
 
 
+  function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
 
 // function applyFilters() {
 //   const cgpaVal = parseFloat(document.getElementById("cgpaFilter").value) || 0;
@@ -184,8 +190,10 @@ function populateFilters(data) {
 //   renderGrid(filtered);
 //   filteredData = filtered;
 // }
-
 function applyFilters() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const recruiterCompany = urlParams.get("company")?.toLowerCase();
+
   const cgpaVal = parseFloat(document.getElementById("cgpaFilter").value) || 0;
   const gradYear = document.getElementById("gradYearFilter").value;
   const areaInt = document.getElementById("interestFilter").value;
@@ -194,7 +202,7 @@ function applyFilters() {
   const ug = parseFloat(document.getElementById("ugFilter").value) || 0;
   const workEx = document.getElementById("workExFilter").value;
   const grad = document.getElementById("gradFilter").value;
-  const stream = document.getElementById("gradStreamFilter").value;  // <-- get stream filter value
+  const stream = document.getElementById("gradStreamFilter").value;
 
   let filtered = window.originalData.filter(row => {
     const cgpaCheck = parseFloat(row["Current Aggregate CGPA"] || 0) >= cgpaVal;
@@ -202,7 +210,7 @@ function applyFilters() {
     const m12Check = parseFloat(row["12th Marks"] || 0) >= m12;
     const ugCheck = parseFloat(row["Graduation Percentage"] || 0) >= ug;
     const gradCheck = gradYear ? row["Graduation Year"] === gradYear : true;
-    const streamCheck = stream ? row["Graduation Stream Category"] === stream : true;  // <-- corrected
+    const streamCheck = stream ? row["Graduation Stream Category"] === stream : true;
 
     let intCheck = true;
     if (areaInt) {
@@ -223,12 +231,29 @@ function applyFilters() {
     else if (workEx === "> 24") workCheck = wex >= 25;
     else if (workEx === "> 36") workCheck = wex > 36;
 
-    return cgpaCheck && m10Check && m12Check && ugCheck && gradCheck && intCheck && workCheck && streamCheck && graduationCheck;
+    let companyCheck = true;
+    if (recruiterCompany) {
+      const companyInterests = (row["Company Interest"] || "").toLowerCase();
+      companyCheck = companyInterests.includes(recruiterCompany);
+    }
+    return (
+      cgpaCheck &&
+      m10Check &&
+      m12Check &&
+      ugCheck &&
+      gradCheck &&
+      intCheck &&
+      workCheck &&
+      streamCheck &&
+      graduationCheck &&
+      companyCheck 
+    );
   });
 
   renderGrid(filtered);
   filteredData = filtered;
 }
+
 
 
 function renderGrid(data) {
