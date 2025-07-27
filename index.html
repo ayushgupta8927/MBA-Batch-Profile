@@ -67,10 +67,17 @@
     </select>
   </div>
 <div class="download-container">
-  <button class="download-button" onclick="downloadFilteredData()">Download Excel</button>
+<button class="download-button" onclick="downloadSelectedData()">Download Excel</button>
+<button class="clearFiltersButton" onclick="clearAllFilters()">Clear Filters</button>
 </div>
-
   
+<div id="selectionControls" style="margin: 20px 0;">
+  <label>
+    <input type="checkbox" id="selectAllCheckbox" />
+    Select All
+  </label>
+  <span id="selectedCount">0 selected</span>
+</div>
 
   <!-- Grid -->
   <div class="grid" id="studentGrid"></div>
@@ -85,6 +92,10 @@
       <a id="resumeLink" href="#" target="_blank">View Resume</a>
     </div>
   </div>
+  <footer style="text-align: center; padding: 10px; background-color: #3b3a3a; font-size: 14px; color: white; border-top: 1px solid #ddd;">
+  © Ayush Gupta. All rights reserved.
+</footer>
+
 <script src="xlsx.full.min.js"></script>
 <script src="script.js"></script>
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>

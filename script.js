@@ -1,4 +1,7 @@
 var filteredData;
+let selectedStudents = new Set();
+const selectedIdsSet = new Set();
+
 document.addEventListener("DOMContentLoaded", () => {
   // Replace this with your published Google Sheets CSV link
   const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTSz-qn6FZy2h5LONgavxoAg53ZSZVNAup9mLTbOiODMuYemVEpXVKP1k5oK5olweQemxvg1FoCCKui/pub?output=csv";
@@ -19,7 +22,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       window.originalData = data;
       populateFilters(data);
-      renderGrid(data);
+      applyFilters();
     },
     error: function (err) {
       console.error("Error fetching Google Sheet:", err);
@@ -31,9 +34,70 @@ document.addEventListener("DOMContentLoaded", () => {
     "marks10Filter", "marks12Filter", "ugFilter", "workExFilter", "gradStreamFilter"
   ];
   filters.forEach(id => document.getElementById(id)?.addEventListener("change", applyFilters));
+
+ document.getElementById("clearFiltersButton").addEventListener("click", () => {
+  const filterIds = [
+    "cgpaFilter", "gradYearFilter", "interestFilter", "gradFilter",
+    "marks10Filter", "marks12Filter", "ugFilter", "workExFilter", "gradStreamFilter"
+  ];
+filterIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = ""; // Reset each filter
+  });
+
+
+  applyFilters(); // Re-apply filters
+
+  // Optional: clear selected students if you want reset behavior
+  // selectedStudents.clear();
+  // updateSelectionUI();
 });
 
+  filterIds.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = "";  // Reset dropdowns to default (first option)
+  });
 
+  applyFilters();  // Re-apply filters to show all students
+});
+
+  document.getElementById("selectAllCheckbox").addEventListener("change", function () {
+  const checkboxes = document.querySelectorAll(".student-select-checkbox");
+  checkboxes.forEach(cb => {
+    const id = cb.dataset.id;
+    if (this.checked) {
+      selectedStudents.add(id);
+    } else {
+      selectedStudents.delete(id);
+    }
+  });
+  updateSelectionUI();
+});
+
+function clearAllFilters() {
+  document.getElementById("cgpaFilter").value = "";
+  document.getElementById("gradYearFilter").value = "";
+  document.getElementById("gradFilter").value = "";
+  document.getElementById("gradStreamFilter").value = "";
+  document.getElementById("interestFilter").value = "";
+  document.getElementById("marks10Filter").value = "";
+  document.getElementById("marks12Filter").value = "";
+  document.getElementById("ugFilter").value = "";
+  document.getElementById("workExFilter").value = "";
+
+  applyFilters(); // Re-run filtering after reset
+}
+document.addEventListener("DOMContentLoaded", () => {
+  const clearBtn = document.getElementById("clearFiltersBtn");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", clearAllFilters);
+  }
+
+  const clearBtnAlt = document.querySelector(".clearFiltersButton");
+  if (clearBtnAlt) {
+    clearBtnAlt.addEventListener("click", clearAllFilters);
+  }
+});
 // document.addEventListener("DOMContentLoaded", () => {
 //   fetch("data/students.xlsx")
   
@@ -138,6 +202,11 @@ function populateFilters(data) {
 }
 
 
+  function getQueryParam(param) {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get(param);
+}
+
 
 // function applyFilters() {
 //   const cgpaVal = parseFloat(document.getElementById("cgpaFilter").value) || 0;
@@ -184,8 +253,10 @@ function populateFilters(data) {
 //   renderGrid(filtered);
 //   filteredData = filtered;
 // }
-
 function applyFilters() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const recruiterCompany = urlParams.get("company")?.toLowerCase();
+
   const cgpaVal = parseFloat(document.getElementById("cgpaFilter").value) || 0;
   const gradYear = document.getElementById("gradYearFilter").value;
   const areaInt = document.getElementById("interestFilter").value;
@@ -194,7 +265,7 @@ function applyFilters() {
   const ug = parseFloat(document.getElementById("ugFilter").value) || 0;
   const workEx = document.getElementById("workExFilter").value;
   const grad = document.getElementById("gradFilter").value;
-  const stream = document.getElementById("gradStreamFilter").value;  // <-- get stream filter value
+  const stream = document.getElementById("gradStreamFilter").value;
 
   let filtered = window.originalData.filter(row => {
     const cgpaCheck = parseFloat(row["Current Aggregate CGPA"] || 0) >= cgpaVal;
@@ -202,7 +273,7 @@ function applyFilters() {
     const m12Check = parseFloat(row["12th Marks"] || 0) >= m12;
     const ugCheck = parseFloat(row["Graduation Percentage"] || 0) >= ug;
     const gradCheck = gradYear ? row["Graduation Year"] === gradYear : true;
-    const streamCheck = stream ? row["Graduation Stream Category"] === stream : true;  // <-- corrected
+    const streamCheck = stream ? row["Graduation Stream Category"] === stream : true;
 
     let intCheck = true;
     if (areaInt) {
@@ -223,12 +294,29 @@ function applyFilters() {
     else if (workEx === "> 24") workCheck = wex >= 25;
     else if (workEx === "> 36") workCheck = wex > 36;
 
-    return cgpaCheck && m10Check && m12Check && ugCheck && gradCheck && intCheck && workCheck && streamCheck && graduationCheck;
+    let companyCheck = true;
+    if (recruiterCompany) {
+      const companyInterests = (row["Company Interest"] || "").toLowerCase();
+      companyCheck = companyInterests.includes(recruiterCompany);
+    }
+    return (
+      cgpaCheck &&
+      m10Check &&
+      m12Check &&
+      ugCheck &&
+      gradCheck &&
+      intCheck &&
+      workCheck &&
+      streamCheck &&
+      graduationCheck &&
+      companyCheck 
+    );
   });
 
   renderGrid(filtered);
   filteredData = filtered;
 }
+
 
 
 function renderGrid(data) {
@@ -237,13 +325,16 @@ function renderGrid(data) {
   grid.innerHTML = "";
   data.forEach(student => {
     const div = document.createElement("div");
-    div.className = "grid-item";
+    div.className = "grid-item student-card";
+    div.dataset.id = student["IITK Email"]; // Unique ID
+
 
     div.innerHTML = `
+    <input type="checkbox" class="student-select-checkbox" data-id="${student["IITK Email"]}" />
     <img src="images/${student.Name.trim()}.jpg" alt="${student.Name}" onerror="this.onerror=null; this.src='images/default.jpg';" />
     <h4>${student.Name}</h4>
     <p>${student["IITK Email"]}</p>
-    <p><Strong>Work-Ex:</strong>${student["Work -Ex (in Months)"]}&nbsp; Months</p>
+    <p><strong>Work-Ex:</strong> ${student["Work -Ex (in Months)"]} Months</p>
     <div style="display: flex; justify-content: center; gap: 10px; align-items: center;">
       <a href="${student["LinkedIn URL"]}" target="_blank">
         <img src="icons/linkedin.png" alt="LinkedIn" style="width: 20px; height: 20px;" />
@@ -254,13 +345,50 @@ function renderGrid(data) {
     </div>
   `;
   
-    div.onclick = () => openModal(student);
-    grid.appendChild(div);
+    div.onclick = (e) => {
+    if (e.target.classList.contains("student-select-checkbox")) return;
+    openModal(student);
+  };
+      grid.appendChild(div);
   });
 
+addCheckboxListeners();
 
+}
 
+function addCheckboxListeners() {
+  document.querySelectorAll(".student-select-checkbox").forEach(checkbox => {
+    const id = checkbox.dataset.id;
+    checkbox.checked = selectedStudents.has(id);
+    const card = checkbox.closest(".student-card");
+    card.classList.toggle("selected", checkbox.checked);
 
+    checkbox.addEventListener("change", (e) => {
+      if (e.target.checked) {
+        selectedStudents.add(id);
+      } else {
+        selectedStudents.delete(id);
+      }
+      updateSelectionUI();
+    });
+  });
+}
+
+function updateSelectionUI() {
+  document.getElementById("selectedCount").textContent = `${selectedStudents.size} selected`;
+
+  document.querySelectorAll(".student-card").forEach(card => {
+    const id = card.dataset.id;
+    card.classList.toggle("selected", selectedStudents.has(id));
+    const checkbox = card.querySelector(".student-select-checkbox");
+    checkbox.checked = selectedStudents.has(id);
+  });
+
+  const visibleCheckboxes = [...document.querySelectorAll(".student-select-checkbox")]
+    .filter(cb => cb.closest(".student-card").offsetParent !== null);
+
+  const allVisibleSelected = visibleCheckboxes.every(cb => selectedStudents.has(cb.dataset.id));
+  document.getElementById("selectAllCheckbox").checked = allVisibleSelected;
 }
 
 function openModal(student) {
@@ -294,18 +422,29 @@ function openModal(student) {
 function closeModal() {
   document.getElementById("studentModal").style.display = "none";
 }
-
-function downloadFilteredData() {
-  if (!filteredData || filteredData.length === 0) {
-    alert("No data to download!");
+function downloadSelectedData() {
+  if (selectedStudents.size === 0) {
+    alert("No selected students to download!");
     return;
   }
 
-  // Convert JSON to worksheet
-  const worksheet = XLSX.utils.json_to_sheet(filteredData);
-  const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "Filtered Students");
+  // Convert Set to Array of IDs
+  const selectedIds = Array.from(selectedStudents);
 
-  // Generate and trigger download
-  XLSX.writeFile(workbook, "Filtered_Students_List.xlsx");
+  // Use originalData to find matching students
+  const selectedData = window.originalData.filter(student =>
+    selectedIds.includes(student["IITK Email"])
+  );
+
+  if (selectedData.length === 0) {
+    alert("Selected data not found!");
+    return;
+  }
+
+  const worksheet = XLSX.utils.json_to_sheet(selectedData);
+  const workbook = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(workbook, worksheet, "Selected Students");
+
+  XLSX.writeFile(workbook, "Selected_Students_List.xlsx");
 }
+

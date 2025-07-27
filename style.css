@@ -167,7 +167,7 @@ a {
   margin: 20px 0;
 }
 
-.download-button {
+.download-button, .clearFiltersButton {
   padding: 10px 20px;
   background-color: #005aa7;
   color: white;
@@ -177,6 +177,16 @@ a {
   cursor: pointer;
 }
 
-.download-button:hover {
+.download-button:hover , .clearFiltersButton:hover {
   background-color: #003f7f;
+}
+
+.student-card.selected {
+  border: 2px solid #007bff;
+  background-color: #e6f0ff;
+}
+.student-select-checkbox {
+  transform: scale(1.5); /* Increase size to 1.5x */
+  margin: 5px;
+  cursor: pointer;
 }
