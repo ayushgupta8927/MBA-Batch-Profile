@@ -448,3 +448,31 @@ function downloadSelectedData() {
   XLSX.writeFile(workbook, "Selected_Students_List.xlsx");
 }
 
+function toggleSharePopup() {
+  const popup = document.getElementById("share-popup");
+  popup.style.display = (popup.style.display === "none") ? "block" : "none";
+}
+
+function shareViaEmail() {
+  const subject = encodeURIComponent("Student Data Shared");
+  const body = encodeURIComponent("Here is the list of selected students:\n\n" + getSelectedAsText());
+  window.location.href = `mailto:?subject=${subject}&body=${body}`;
+}
+
+function shareViaWhatsApp() {
+  const text = encodeURIComponent("Here is the student list:\n\n" + getSelectedAsText());
+  window.open(`https://wa.me/?text=${text}`, "_blank");
+}
+
+function copyToClipboard() {
+  const text = getSelectedAsText();
+  navigator.clipboard.writeText(text).then(() => {
+    alert("Copied to clipboard!");
+  });
+}
+
+// Example: convert selected student cards to text
+function getSelectedAsText() {
+  const selectedData = data.filter(d => selectedCards.includes(d.RollNumber));
+  return selectedData.map(s => `Name: ${s.Name}, Roll: ${s.RollNumber}`).join('\n');
+}
