@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="330" viewBox="0 0 1200 330">
+<rect width="1200" height="330" rx="24" fill="#171b2b"/>
+<text x="60" y="58" fill="#f5f7ff" font-family="Arial" font-size="27" font-weight="700">From static spreadsheets to recruiter-ready discovery</text>
+
+    <rect x="55" y="105" width="175" height="145" rx="16" fill="#222941" stroke="#6398ff" stroke-width="2"/>
+    <text x="73" y="139" fill="#79a8ff" font-family="Arial" font-size="17" font-weight="700">01</text>
+    <text x="73" y="178" fill="#ffffff" font-family="Arial" font-size="19" font-weight="700">Student data</text>
+    <text x="73" y="211" fill="#c5cde0" font-family="Arial" font-size="13">Structured batch profiles</text>
+    <path d="M235 177 h48 m-10 -8 l10 8 -10 8" fill="none" stroke="#79a8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="290" y="105" width="175" height="145" rx="16" fill="#222941" stroke="#6398ff" stroke-width="2"/>
+    <text x="308" y="139" fill="#79a8ff" font-family="Arial" font-size="17" font-weight="700">02</text>
+    <text x="308" y="178" fill="#ffffff" font-family="Arial" font-size="19" font-weight="700">Search & filter</text>
+    <text x="308" y="211" fill="#c5cde0" font-family="Arial" font-size="13">Narrow the candidate pool</text>
+    <path d="M470 177 h48 m-10 -8 l10 8 -10 8" fill="none" stroke="#79a8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="525" y="105" width="175" height="145" rx="16" fill="#222941" stroke="#6398ff" stroke-width="2"/>
+    <text x="543" y="139" fill="#79a8ff" font-family="Arial" font-size="17" font-weight="700">03</text>
+    <text x="543" y="178" fill="#ffffff" font-family="Arial" font-size="19" font-weight="700">Shortlist</text>
+    <text x="543" y="211" fill="#c5cde0" font-family="Arial" font-size="13">Select relevant profiles</text>
+    <path d="M705 177 h48 m-10 -8 l10 8 -10 8" fill="none" stroke="#79a8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="760" y="105" width="175" height="145" rx="16" fill="#222941" stroke="#6398ff" stroke-width="2"/>
+    <text x="778" y="139" fill="#79a8ff" font-family="Arial" font-size="17" font-weight="700">04</text>
+    <text x="778" y="178" fill="#ffffff" font-family="Arial" font-size="19" font-weight="700">Review</text>
+    <text x="778" y="211" fill="#c5cde0" font-family="Arial" font-size="13">Open CV / LinkedIn</text>
+    <path d="M940 177 h48 m-10 -8 l10 8 -10 8" fill="none" stroke="#79a8ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="995" y="105" width="175" height="145" rx="16" fill="#222941" stroke="#6398ff" stroke-width="2"/>
+    <text x="1013" y="139" fill="#79a8ff" font-family="Arial" font-size="17" font-weight="700">05</text>
+    <text x="1013" y="178" fill="#ffffff" font-family="Arial" font-size="19" font-weight="700">Export</text>
+    <text x="1013" y="211" fill="#c5cde0" font-family="Arial" font-size="13">Download shortlist to Excel</text>
+    </svg>
